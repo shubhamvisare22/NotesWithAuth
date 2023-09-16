@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 
 # custom imports
-from .serializers import NoteSerilizer
+from .serializers import NoteSerializer
 from .models import NoteModel
 from .paginations import CustomPagination
 
@@ -48,7 +48,7 @@ def sort_notes(queryset, sort_param):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_note(request):
-    serializer = NoteSerilizer(data=request.data)
+    serializer = NoteSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save(user=request.user)
         return Response({'msg': 'Note created successfully.'}, status=status.HTTP_200_OK)
@@ -70,7 +70,7 @@ def list_notes(request):
         # pagination here
         paginator = CustomPagination()
         result_pages = paginator.paginate_queryset(sorted_note_objs, request)
-        serializer = NoteSerilizer(result_pages, many=True)
+        serializer = NoteSerializer(result_pages, many=True)
 
         msg = 'All Note fetched successfully.'
         if serializer.data == []:
@@ -87,7 +87,7 @@ def retrieve_note(request, id):
     if request.method == 'GET':
         try:
             retrive_obj = NoteModel.objects.get(id=id, user=request.user)
-            serializer = NoteSerilizer(retrive_obj)
+            serializer = NoteSerializer(retrive_obj)
             return Response({'msg': ' Note fetched successfully.', 'notes': serializer.data}, status=status.HTTP_200_OK)
         except NoteModel.DoesNotExist:
             return Response({'msg': 'Given Id does not exists.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -101,10 +101,11 @@ def update_note(request, id):
     if request.method == 'PUT':
         try:
             retrive_obj = NoteModel.objects.get(id=id, user=request.user)
-            serializer = NoteSerilizer(retrive_obj, data=request.data)
+            serializer = NoteSerializer(retrive_obj, data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response({'msg': ' Note Updated successfully.', 'notes': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except NoteModel.DoesNotExist:
             return Response({'msg': 'Given Id does not exists.'}, status=status.HTTP_400_BAD_REQUEST)
     return Response({'msg': 'Invalid Request Method'}, status=status.HTTP_400_BAD_REQUEST)
@@ -114,15 +115,20 @@ def update_note(request, id):
 @permission_classes([permissions.IsAuthenticated])
 def patch_note(request, id):
     if request.method == 'PATCH':
+
         try:
-            retrive_obj  = NoteModel.objects.get(id=id, user=request.user)
-            serializer = NoteSerilizer(retrive_obj, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'msg':' Note Updated successfully.', 'notes':serializer.data}, status=status.HTTP_200_OK)
+            retrive_obj = NoteModel.objects.get(id=id, user=request.user)
         except NoteModel.DoesNotExist:
-            return Response({'msg':'Given Id does not exist or you do not have permission to update this note.'}, status=status.HTTP_400_BAD_REQUEST)
-    return Response({'msg':'Invalid Request Method'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'msg': 'Given Id does not exist or you do not have permission to update this note.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = NoteSerializer(
+            retrive_obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'msg': 'Note Updated successfully.', 'notes': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'msg': 'Invalid Request Method'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Delete Note
