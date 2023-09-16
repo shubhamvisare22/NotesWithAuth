@@ -11,10 +11,11 @@ class NoteSerilizer(serializers.ModelSerializer):
         model = NoteModel
         fields = ['id', 'title', 'content',  'created_at', 'updated_at']
 
+    
     def validate(self, data):
 
-        title = data['title']
-        content = data['content']
+        title = data.get('title','')
+        content = data.get('content','')
 
         if not title or str(title).strip() == '':
             raise serializers.ValidationError('Please Enter the Title.')

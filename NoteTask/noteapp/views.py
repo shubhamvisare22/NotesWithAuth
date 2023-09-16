@@ -10,7 +10,7 @@ from .serializers import NoteSerilizer
 from .models import NoteModel
 from .paginations import CustomPagination
 
-'''---------- User Related views --------'''
+'''---------- User Related view --------'''
 
 
 @api_view(['POST'])
@@ -103,11 +103,26 @@ def update_note(request, id):
             retrive_obj = NoteModel.objects.get(id=id, user=request.user)
             serializer = NoteSerilizer(retrive_obj, data=request.data)
             if serializer.is_valid():
-                serializer.save(request.user)
+                serializer.save()
                 return Response({'msg': ' Note Updated successfully.', 'notes': serializer.data}, status=status.HTTP_200_OK)
         except NoteModel.DoesNotExist:
             return Response({'msg': 'Given Id does not exists.'}, status=status.HTTP_400_BAD_REQUEST)
     return Response({'msg': 'Invalid Request Method'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def patch_note(request, id):
+    if request.method == 'PATCH':
+        try:
+            retrive_obj  = NoteModel.objects.get(id=id, user=request.user)
+            serializer = NoteSerilizer(retrive_obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'msg':' Note Updated successfully.', 'notes':serializer.data}, status=status.HTTP_200_OK)
+        except NoteModel.DoesNotExist:
+            return Response({'msg':'Given Id does not exist or you do not have permission to update this note.'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'msg':'Invalid Request Method'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Delete Note
