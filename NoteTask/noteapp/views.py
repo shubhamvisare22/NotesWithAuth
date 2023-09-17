@@ -61,8 +61,7 @@ def create_note(request):
 def list_notes(request):
     if request.method == 'GET':
 
-        # sorting on update_at or created_at
-        # by default sort by creation time
+        # sorting on update_at or created_at (default:created_at)
         sort_param = request.GET.get('sort', 'created_at')
         note_objs = NoteModel.objects.filter(user=request.user)
         sorted_note_objs = sort_notes(note_objs, sort_param)
