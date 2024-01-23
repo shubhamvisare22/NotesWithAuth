@@ -32,4 +32,4 @@ API Documentation Link : https://documenter.getpostman.com/view/28016390/2s9YC7S
   2. Token must be included in headers with Authorization key for CRUD operations.
   3. Endpoint documentation available on here (https://documenter.getpostman.com/view/28016390/2s9YC7SWnA) for easy project setup.
 
-**Note:** AWS services like Lambda and DynamoDB were not used due to lack of expertise; however, all project requirements were fulfilled.
+
